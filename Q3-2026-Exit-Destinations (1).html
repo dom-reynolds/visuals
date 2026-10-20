@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Q3 2026 Exit Destinations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: series masthead + week tabs; each week is one reading column (context → chart → findings), with prev/next at the foot */
+:root {
+  --bg: #f7f8f7;
+  --surface: #fdfdfc;
+  --ink: #111614;
+  --ink-2: #4b524f;
+  --muted: #747c78;
+  --grid: #e1e4e1;
+  --axis: #c3c8c4;
+  --ring: rgba(17,22,20,0.10);
+  --accent: #1f5f8b;
+  --accent-wash: #e6eff6;
+  --perm: #2a78d6;
+  --temp: #eb6834;
+  --inst: #1baf7a;
+  --home: #eda100;
+  --other: #a8a69e;
+  --pos: #006300;
+  --neg: #b13232;
+  --flag-bg: #fff5e0;
+  --warn: #c98500;
+  --flag-ink: #6b4a00;
+  --font-ui: "Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1211; --surface: #181c1a; --ink: #f3f5f4; --ink-2: #c1c8c4; --muted: #8b938f;
+    --grid: #2a302d; --axis: #3a413d; --ring: rgba(255,255,255,0.10); --accent: #7fb6dd; --accent-wash: #1a2a36;
+    --perm: #3987e5; --temp: #d95926; --inst: #199e70; --home: #c98500; --other: #6e6d68;
+    --pos: #3fbf3f; --neg: #e66767;
+    --flag-bg: #2e2510; --flag-ink: #f2cf83; --warn: #fab219; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1211; --surface: #181c1a; --ink: #f3f5f4; --ink-2: #c1c8c4; --muted: #8b938f;
+  --grid: #2a302d; --axis: #3a413d; --ring: rgba(255,255,255,0.10); --accent: #7fb6dd; --accent-wash: #1a2a36;
+  --perm: #3987e5; --temp: #d95926; --inst: #199e70; --home: #c98500; --other: #6e6d68;
+  --pos: #3fbf3f; --neg: #e66767;
+  --flag-bg: #2e2510; --flag-ink: #f2cf83; --warn: #fab219; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.55; padding-inline: 16px; padding-block: 28px 64px; }
+.wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 28px; }
+header { display: grid; gap: 8px; }
+.eyebrow { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-size: clamp(28px, 4.5vw, 40px); line-height: 1.1; font-weight: 800; letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(22px, 3.2vw, 28px); font-weight: 800; margin: 0; letter-spacing: -0.015em; line-height: 1.15; text-wrap: balance; }
+h3 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -0.01em; text-wrap: balance; }
+p { margin: 0; }
+.lede { color: var(--ink-2); max-width: 65ch; }
+.sub { color: var(--ink-2); max-width: 68ch; font-size: 14px; }
+.prose { display: grid; gap: 10px; max-width: 68ch; color: var(--ink-2); }
+.prose strong { color: var(--ink); }
+
+/* week tabs */
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; position: sticky; top: env(safe-area-inset-top, 0px); background: var(--bg); padding-block: 8px; z-index: 5; }
+.tab { font: inherit; text-align: left; border: 1px solid var(--ring); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 10px 12px; cursor: pointer; display: grid; gap: 2px; min-width: 0; }
+.tab .wk { font-family: var(--font-data); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.tab .tt { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.tab:hover { border-color: var(--axis); }
+.tab[aria-selected="true"] { background: var(--accent-wash); border-color: var(--accent); }
+.tab[aria-selected="true"] .wk { color: var(--accent); }
+.tab:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (max-width: 640px) { .tabs { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+.week { display: grid; gap: 32px; }
+.week-head { display: grid; gap: 10px; padding-top: 4px; }
+section { display: grid; gap: 14px; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 20px; min-width: 0; }
+
+/* KPI row */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.kpis.three { grid-template-columns: repeat(3, minmax(0,1fr)); }
+.kpi { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; display: grid; gap: 4px; align-content: start; }
+.kpi.lead { border-color: var(--accent); }
+.kpi .label { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+.kpi .val { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.1; }
+.kpi .note { font-size: 12.5px; color: var(--muted); }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; flex: none; }
+@media (max-width: 720px) { .kpis, .kpis.three { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+
+/* rules cards (week 1) */
+.rules { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.rule { border-top: 3px solid var(--ink); padding-top: 10px; display: grid; gap: 6px; align-content: start; }
+.rule.pos { border-color: var(--pos); }
+.rule.neg { border-color: var(--neg); }
+.rule.exc { border-color: var(--axis); }
+.rule .tag { font-family: var(--font-data); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+.rule.pos .tag { color: var(--pos); }
+.rule.neg .tag { color: var(--neg); }
+.rule.exc .tag { color: var(--muted); }
+.rule h3 { font-size: 16px; }
+.rule p, .rule li { font-size: 13.5px; color: var(--ink-2); }
+.rule ul { margin: 0; padding-left: 18px; display: grid; gap: 2px; }
+@media (max-width: 720px) { .rules { grid-template-columns: 1fr; } }
+
+/* equation (week 1) */
+.calc { display: grid; gap: 16px; }
+.calc-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; font-family: var(--font-data); font-size: 14px; color: var(--ink-2); }
+.calc-line b { font-family: var(--font-ui); font-size: 26px; font-weight: 800; color: var(--ink); letter-spacing: -0.01em; }
+.calc-line .op { color: var(--muted); }
+.calc-line small { display: block; font-family: var(--font-ui); font-size: 12px; color: var(--muted); }
+.calc-line .term { display: grid; }
+.meter { display: flex; height: 26px; gap: 2px; }
+.meter > div { height: 100%; }
+.meter > div:first-child { border-radius: 4px 0 0 4px; }
+.meter > div:last-child { border-radius: 0 4px 4px 0; }
+
+/* legend */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; }
+
+/* stacked rows */
+.stack-rows { display: grid; gap: 18px; }
+.srow { display: grid; grid-template-columns: 190px minmax(0,1fr); gap: 14px; align-items: center; }
+.srow .who { font-size: 14px; font-weight: 600; line-height: 1.3; }
+.srow .who small { display: block; font-weight: 400; color: var(--muted); font-family: var(--font-data); font-size: 12px; }
+.bar100 { display: flex; height: 34px; gap: 2px; }
+.seg { height: 100%; position: relative; cursor: default; display: flex; align-items: center; justify-content: center; font-family: var(--font-data); font-size: 12px; font-weight: 500; min-width: 2px; }
+.seg:first-child { border-radius: 4px 0 0 4px; }
+.seg:last-child { border-radius: 0 4px 4px 0; }
+.seg:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@media (max-width: 600px) { .srow { grid-template-columns: 1fr; gap: 6px; } }
+
+/* rate rows (simple single-value bars) */
+.rate-rows { display: grid; gap: 12px; }
+.rrow { display: grid; grid-template-columns: 190px minmax(0,1fr) 64px; gap: 14px; align-items: center; }
+.rrow .who { font-size: 14px; font-weight: 600; }
+.rrow .who small { display: block; font-weight: 400; color: var(--muted); font-family: var(--font-data); font-size: 12px; }
+.rrow .track { height: 18px; background: var(--grid); border-radius: 4px; position: relative; }
+.rrow .fill { height: 100%; border-radius: 4px; background: var(--accent); }
+.rrow .v { font-family: var(--font-data); font-size: 14px; font-weight: 500; text-align: right; font-variant-numeric: tabular-nums; }
+@media (max-width: 600px) { .rrow { grid-template-columns: minmax(0,1fr) 64px; } .rrow .track { grid-column: 1 / -1; grid-row: 2; } }
+
+/* detail bars */
+.group-h { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-family: var(--font-data); margin: 16px 0 4px; display: flex; justify-content: space-between; gap: 12px; }
+.group-h:first-child { margin-top: 0; }
+.group-h span { display: inline-flex; align-items: center; }
+.drow { display: grid; grid-template-columns: minmax(0, 260px) minmax(0,1fr) 92px; gap: 12px; align-items: center; padding: 3px 0; }
+.drow .name { font-size: 13.5px; color: var(--ink); }
+.drow .track { height: 14px; }
+.drow .fill { height: 100%; border-radius: 0 4px 4px 0; min-width: 2px; }
+.drow .n { font-family: var(--font-data); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); white-space: nowrap; }
+.drow .n b { color: var(--ink); font-weight: 500; }
+.drow:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+@media (max-width: 600px) { .drow { grid-template-columns: minmax(0,1fr) 84px; } .drow .track { grid-column: 1 / -1; grid-row: 2; } }
+
+/* callouts */
+.findings { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 16px 20px; }
+.finding { border-top: 2px solid var(--ink); padding-top: 10px; display: grid; gap: 4px; align-content: start; }
+.finding .big { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; }
+.finding p { color: var(--ink-2); font-size: 14px; }
+@media (max-width: 640px) { .findings { grid-template-columns: 1fr; } }
+.flag { background: var(--flag-bg); color: var(--flag-ink); border-radius: 8px; padding: 12px 14px; font-size: 13.5px; max-width: 80ch; }
+.discuss { border-left: 3px solid var(--accent); padding: 4px 0 4px 14px; display: grid; gap: 6px; }
+.discuss .eyebrow { color: var(--accent); }
+.discuss ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; color: var(--ink-2); font-size: 14px; max-width: 70ch; }
+
+/* HUD code chip */
+.code { font-family: var(--font-data); font-size: 11.5px; font-weight: 500; color: var(--accent); background: var(--accent-wash); border-radius: 4px; padding: 2px 6px; vertical-align: 3px; margin-left: 6px; letter-spacing: 0.02em; white-space: nowrap; }
+abbr[title] { text-decoration: underline dotted var(--muted); text-underline-offset: 2px; cursor: help; }
+
+/* data quality flag */
+.dq { border: 1px solid color-mix(in srgb, var(--warn) 55%, transparent); background: var(--flag-bg); border-radius: 10px; padding: 18px 20px; display: grid; gap: 14px; min-width: 0; }
+.dq-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.dq-badge { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-data); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; color: var(--flag-ink); }
+.dq-badge svg { width: 16px; height: 16px; flex: none; }
+.dq h3 { color: var(--ink); }
+.dq p, .dq li { color: var(--ink-2); font-size: 14px; }
+.dq .cols { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 16px 20px; }
+.dq .cols h4 { margin: 0 0 4px; font-size: 14px; font-weight: 700; color: var(--ink); }
+.dq ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.dq .bd { display: grid; gap: 6px; background: var(--surface); border-radius: 8px; padding: 14px 16px; border: 1px solid var(--ring); }
+.dq .range { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.dq .range div { background: var(--surface); border: 1px solid var(--ring); border-radius: 8px; padding: 12px 14px; display: grid; gap: 2px; }
+.dq .range b { font-size: 26px; font-weight: 800; letter-spacing: -0.01em; color: var(--ink); }
+.dq .range span { font-size: 12.5px; color: var(--ink-2); }
+.dq a.jump, .lede a.jump { color: var(--accent); font-weight: 600; }
+@media (max-width: 720px) { .dq .cols { grid-template-columns: 1fr; } .dq .range { grid-template-columns: 1fr; } }
+
+/* acronym index */
+.gloss { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 0 28px; margin: 0; }
+.gloss div { display: grid; grid-template-columns: 92px minmax(0,1fr); gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--grid); align-items: baseline; }
+.gloss dt { font-family: var(--font-data); font-size: 13px; font-weight: 500; color: var(--ink); }
+.gloss dd { margin: 0; font-size: 13.5px; color: var(--ink-2); }
+.gloss dd b { color: var(--ink); font-weight: 600; }
+@media (max-width: 720px) { .gloss { grid-template-columns: 1fr; } }
+
+.prose h4 { margin: 8px 0 0; font-size: 16px; font-weight: 700; color: var(--ink); text-wrap: balance; }
+.prose h4:first-child { margin-top: 0; }
+
+/* table */
+details summary { cursor: pointer; font-weight: 600; font-size: 14px; color: var(--accent); }
+details summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.tbl-wrap { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+th, td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-weight: 600; color: var(--ink-2); border-bottom: 1px solid var(--axis); font-size: 12px; vertical-align: bottom; }
+td { font-family: var(--font-data); font-size: 12.5px; }
+td:first-child { font-family: var(--font-ui); font-size: 13px; }
+tr.cat td { font-weight: 700; font-family: var(--font-ui); background: color-mix(in srgb, var(--grid) 45%, transparent); }
+tr.tot td { font-weight: 700; border-top: 1px solid var(--axis); }
+
+/* week footer nav */
+.wnav { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--grid); padding-top: 16px; flex-wrap: wrap; }
+.wnav button { font: inherit; font-size: 14px; font-weight: 600; color: var(--accent); background: none; border: 1px solid var(--ring); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.wnav button:hover { border-color: var(--accent); }
+.wnav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12.5px; padding: 8px 10px; border-radius: 6px; max-width: 260px; line-height: 1.4; z-index: 20; }
+.tip b { display: block; font-weight: 700; }
+footer { font-size: 12.5px; color: var(--muted); max-width: 75ch; display: grid; gap: 6px; }
+footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Funder report · HUD APR Q23c–Q23e · All projects · July 1 – September 30, 2026</div>
+    <h1>Exit Destination Four-Week Series</h1>
+    <p class="lede">From July 1 to September 30, 863 clients exited our projects. Over the next four weeks we will share where clients went after exit, starting with an overview, then destination by category, housing subsidies, and destination by race and ethnicity. Acronyms are defined in the <a href="#acronyms" class="jump">Acronym Index</a> at the bottom of each week.</p>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Weeks">
+    <button class="tab" role="tab" id="t1" aria-controls="week1" aria-selected="true"><span class="wk">Week 1</span><span class="tt">Exit Destination Overview</span></button>
+    <button class="tab" role="tab" id="t2" aria-controls="week2" aria-selected="false" tabindex="-1"><span class="wk">Week 2</span><span class="tt">Destination by Category</span></button>
+    <button class="tab" role="tab" id="t3" aria-controls="week3" aria-selected="false" tabindex="-1"><span class="wk">Week 3</span><span class="tt">Housing Subsidies</span></button>
+    <button class="tab" role="tab" id="t4" aria-controls="week4" aria-selected="false" tabindex="-1"><span class="wk">Week 4</span><span class="tt">Race and Ethnicity</span></button>
+  </nav>
+
+  <!-- WEEK 1 -->
+  <article class="week" id="week1" role="tabpanel" aria-labelledby="t1">
+    <div class="week-head">
+      <div class="eyebrow">Week 1 of 4</div>
+      <h2>What is Exit Destination?</h2>
+      <p class="lede">Exit destination is where a client goes when they leave one of our projects. Staff ask each client where they will be staying and record the answer in HMIS at exit.</p>
+    </div>
+
+    <section>
+      <div class="prose">
+        <h4>Why is Exit Destination Important?</h4>
+        <p>Exit destination tells us what happened to clients after they left our care. The number of clients served shows how many people we reached, while exit destination shows whether those clients moved into housing, returned to shelter or the street, or left without telling us where they were going.</p>
+        <h4>How Does Exit Destination Inform HUD Funding to our Community?</h4>
+        <p>We report exit destination to HUD through the Annual Performance Report (APR), questions Q23c through Q23e. The same data is used for HUD System Performance Measure 7 (SPM 7), which measures how many clients are placed in or stay in permanent housing. HUD uses SPM 7 when scoring our community’s CoC application and when making ESG funding decisions, so our exit outcomes directly affect the federal dollars that come to our community.</p>
+        <h4>How Do We Use This Data?</h4>
+        <p>Breaking exit destination down by household type, destination category, subsidy type, and race and ethnicity helps us see which clients are reaching stable housing and where more support is needed.</p>
+      </div>
+    </section>
+
+    <section>
+      <h3>What Counts as a Positive Exit?</h3>
+      <div class="rules">
+        <div class="rule pos"><span class="tag">Positive</span><h3>Permanent Housing</h3><p>Renting or owning, with or without a subsidy, or staying with family or friends with permanent tenure. For Street Outreach (SO) projects, HUD also counts exits to ES, TH, other temporary destinations, and some institutional settings as positive.</p></div>
+        <div class="rule neg"><span class="tag">Not positive</span><h3>All Other Destinations</h3><p>Emergency shelter, places not meant for habitation, temporary stays, and most institutional settings. HUD also counts No exit interview completed, Client doesn’t know/prefers not to answer, Data not collected, and Other as not positive.</p></div>
+        <div class="rule exc"><span class="tag">Excluded from the rate</span><h3>Excluded Destinations</h3><ul><li>Deceased</li><li>Foster care home or foster care group home</li><li>Hospital or other residential non-psychiatric medical facility</li><li>Long-term care facility or nursing home</li></ul></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>What Was Our Positive Exit Rate This Quarter? <span class="code">Q23c</span></h3>
+      <div class="panel calc">
+        <div class="calc-line">
+          <span class="term"><b>463</b><small>positive exits</small></span>
+          <span class="op">÷</span>
+          <span class="term"><b>842</b><small>863 exits − 21 excluded</small></span>
+          <span class="op">=</span>
+          <span class="term"><b style="color:var(--accent)">54.99%</b><small>positive housing destinations</small></span>
+        </div>
+        <div class="meter" role="img" aria-label="463 positive exits, 379 other exits, 21 excluded">
+          <div style="flex:463 1 0;background:var(--perm)"></div>
+          <div style="flex:379 1 0;background:var(--grid)"></div>
+          <div style="flex:21 1 0;background:var(--axis)"></div>
+        </div>
+        <div class="legend"><span><i class="swatch" style="background:var(--perm)"></i>Positive (463)</span><span><i class="swatch" style="background:var(--grid);outline:1px solid var(--axis)"></i>Not positive (379)</span><span><i class="swatch" style="background:var(--axis)"></i>Excluded (21)</span></div>
+        <p class="sub">451 clients exited to PH. The remaining 12 positive exits came from SO projects, where HUD counts exits to ES, TH, or other temporary settings as positive.</p>
+      </div>
+    </section>
+
+    <section>
+      <h3>How Did the Positive Exit Rate Differ by Household Type?</h3>
+      <div class="panel rate-rows">
+        <div class="rrow"><span class="who">All households<small>463 of 842</small></span><div class="track"><div class="fill" style="width:54.99%"></div></div><span class="v">55.0%</span></div>
+        <div class="rrow"><span class="who">With children and adults<small>294 of 510</small></span><div class="track"><div class="fill" style="width:57.65%"></div></div><span class="v">57.6%</span></div>
+        <div class="rrow"><span class="who">Without children<small>169 of 329</small></span><div class="track"><div class="fill" style="width:51.37%"></div></div><span class="v">51.4%</span></div>
+      </div>
+      <p class="sub">All 3 households with only children exited to ES, so the rate for that group is 0%.</p>
+    </section>
+
+    <section>
+      <h3>Quarter at a Glance</h3>
+      <div class="kpis">
+        <div class="kpi"><span class="label">Total exits</span><span class="val">863</span><span class="note">345 without children · 515 with children and adults · 3 with only children</span></div>
+        <div class="kpi"><span class="label"><i class="swatch" style="background:var(--perm)"></i>Permanent situations</span><span class="val">451</span><span class="note">52.3% of all exits</span></div>
+        <div class="kpi"><span class="label"><i class="swatch" style="background:var(--home)"></i>Homeless situations</span><span class="val">101</span><span class="note">11.7% · 61 to a place not meant for habitation</span></div>
+        <div class="kpi"><span class="label"><i class="swatch" style="background:var(--other)"></i>Other situations</span><span class="val">175</span><span class="note">20.3% · see data flag below</span></div>
+      </div>
+    </section>
+
+    <section class="dq" aria-label="Data flag">
+      <div class="dq-head"><span class="dq-badge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1z" fill="var(--warn)"/><path d="M8 6v3.6" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="#1a1a1a"/></svg>Data flag</span><h3>Why Do 1 in 5 Exits Have No Known Destination?</h3></div>
+      <p>171 exits (19.8%) were recorded as No exit interview completed, Other, Client doesn’t know/prefers not to answer, or Data not collected. HUD counts all of these as not positive, which lowers our 54.99% rate even though some of these clients may have moved into housing. Week 2 covers <a href="#week2" class="jump" data-flag>why this happens and how it affects the rate</a>.</p>
+    </section>
+
+    <div class="discuss">
+      <span class="eyebrow">Coming Up</span>
+      <ul>
+        <li>Week 2: Exit destination by category, and how households with and without children compare.</li>
+        <li>Week 3: How many clients exited with an ongoing housing subsidy, and which subsidy types they used.</li>
+        <li>Week 4: Exit destination by race and ethnicity.</li>
+      </ul>
+    </div>
+    <div class="wnav"><span></span><button data-go="2">Next: Week 2, Destination by Category →</button></div>
+  </article>
+
+  <!-- WEEK 2 -->
+  <article class="week" id="week2" role="tabpanel" aria-labelledby="t2" hidden>
+    <div class="week-head">
+      <div class="eyebrow">Week 2 of 4</div>
+      <h2>Where Did Clients Go After Exit?</h2>
+      <p class="lede">APR Q23c groups more than 30 HUD destinations into five categories: Permanent, Temporary, Institutional, Homeless, and Other. This week looks at how exits were spread across those categories and which destinations made up each one.</p>
+    </div>
+
+    <section>
+      <h3>How Did Destination Differ by Household Type? <span class="code">Q23c</span></h3>
+      <p class="sub">Share of exits in each category. Households with children and adults exited to PH more often than households without children, and also made up most exits to a place not meant for habitation.</p>
+      <div class="legend" data-legend></div>
+      <div class="panel"><div class="stack-rows" id="stacks"></div></div>
+    </section>
+
+    <section>
+      <h3>Key Takeaways</h3>
+      <div class="findings">
+        <div class="finding"><span class="big">294 Rentals With No Ongoing Subsidy</span><p>This was the most common destination, making up 34% of all exits and 65% of permanent exits. 214 of these were households with children and adults.</p></div>
+        <div class="finding"><span class="big">47 Clients in Families Exited Unsheltered</span><p>47 clients in households with children and adults exited to a place not meant for habitation. That is 77% of the 61 unsheltered exits, while these households made up 60% of all exits.</p></div>
+        <div class="finding"><span class="big">80 Clients Staying With Family Temporarily</span><p>This was the most common temporary destination. These clients have somewhere to stay, but without permanent tenure.</p></div>
+        <div class="finding"><span class="big">171 Exits With No Known Destination</span><p>19.8% of exits were No exit interview completed, Other, Client doesn’t know/prefers not to answer, or Data not collected. See the data flag below.</p></div>
+      </div>
+    </section>
+
+    <section class="dq" id="dataflag" aria-label="Data flag">
+      <div class="dq-head"><span class="dq-badge"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 15 14H1z" fill="var(--warn)"/><path d="M8 6v3.6" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="#1a1a1a"/></svg>Data flag</span><h3>Other, Unknown, and Data Not Collected <span class="code">Q23c</span></h3></div>
+      <p>175 exits fall under Other Situations in Q23c. Four of these are deceased, which HUD excludes from the rate. The remaining 171 (19.8% of all exits) do not have a known destination and are counted as not positive.</p>
+      <div class="bd" id="dqbars"></div>
+      <div class="cols">
+        <div><h4>Why Does This Happen?</h4><ul>
+          <li><b>No exit interview completed (81):</b> Clients may leave ES or SO without notice, stop coming, or cannot be reached after they leave. 60 of the 81 are households without children.</li>
+          <li><b>Other (52):</b> Used when a client’s destination does not match one of the HUD options. 44 of the 52 are households with children and adults.</li>
+          <li><b>Client doesn’t know/prefers not to answer (28):</b> Some clients do not have a plan yet at exit, or choose not to share it.</li>
+          <li><b>Data not collected (10):</b> The destination was left blank in HMIS.</li>
+        </ul></div>
+        <div><h4>Why Does It Matter?</h4><ul>
+          <li>HUD counts each of these as not positive in the APR and SPM 7, the same as an exit to a place not meant for habitation.</li>
+          <li>An unknown destination does not mean the client is unhoused. Some of these clients may have moved into housing we were not told about.</li>
+          <li>Because of this, our 54.99% rate should be read as a minimum.</li>
+        </ul></div>
+        <div><h4>Why Do We Still Report It?</h4><ul>
+          <li>We follow HUD’s reporting rules so our numbers match what we submit to HUD and can be compared with other providers.</li>
+          <li>Reporting these exits shows our funders how much of the outcome data is still unknown.</li>
+          <li>Completing exit interviews at last contact, making follow-up calls, and reviewing Other entries can reduce the number of unknown destinations.</li>
+        </ul></div>
+      </div>
+      <div class="range">
+        <div><b>54.99%</b><span>HUD positive exit rate (463 of 842), with unknown destinations counted as not positive</span></div>
+        <div><b>69.0%</b><span>Positive exit rate for clients with a known destination (463 of 671). Shown for context only. This is not a HUD measure.</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>All Destinations by Category <span class="code">Q23c</span></h3>
+      <p class="sub">Number of clients and share of all 863 exits. Hover over a row to see the breakdown by household type. Destinations with zero exits are only shown in the full table.</p>
+      <div class="panel" id="detail"></div>
+    </section>
+
+    <section>
+      <details>
+        <summary>Show the full Q23c table</summary>
+        <div class="tbl-wrap"><table id="fulltable"></table></div>
+      </details>
+    </section>
+    <div class="wnav"><button data-go="1">← Week 1</button><button data-go="3">Next: Week 3, Housing Subsidies →</button></div>
+  </article>
+
+  <!-- WEEK 3 -->
+  <article class="week" id="week3" role="tabpanel" aria-labelledby="t3" hidden>
+    <div class="week-head">
+      <div class="eyebrow">Week 3 of 4</div>
+      <h2>How Many Clients Exited With a Housing Subsidy?</h2>
+      <p class="lede">An ongoing housing subsidy, such as a VASH or HCV voucher or RRH assistance, helps clients keep their housing after exit. This week looks at how many PH exits had a subsidy and which subsidy types were used (APR Q23d).</p>
+    </div>
+
+    <section>
+      <div class="kpis three">
+        <div class="kpi"><span class="label">Permanent exits</span><span class="val">451</span><span class="note">52.3% of all exits</span></div>
+        <div class="kpi lead"><span class="label">Rental with ongoing subsidy</span><span class="val">54</span><span class="note">12% of permanent exits</span></div>
+        <div class="kpi"><span class="label">Rental with no ongoing subsidy</span><span class="val">294</span><span class="note">65% of permanent exits</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>What Types of Permanent Housing Did Clients Exit To? <span class="code">Q23c</span></h3>
+      <p class="sub">All 451 permanent exits by destination.</p>
+      <div class="panel" id="permtypes"></div>
+    </section>
+
+    <section>
+      <h3>Which Subsidy Types Were Used? <span class="code">Q23d</span></h3>
+      <p class="sub">Q23d includes all projects except HP, so it totals 51 instead of the 54 rentals with an ongoing subsidy reported in Q23c.</p>
+      <div class="panel" id="subsidy"></div>
+    </section>
+
+    <section>
+      <h3>Key Takeaways</h3>
+      <div class="findings">
+        <div class="finding"><span class="big">VASH Made Up 57% of Subsidies</span><p>29 of the 51 subsidized exits used VASH, and 27 of those were households without children.</p></div>
+        <div class="finding"><span class="big">Few Families Exited With a Subsidy</span><p>16 of 294 PH exits in households with children and adults (5%) had an ongoing subsidy, compared with 38 of 157 households without children (24%).</p></div>
+        <div class="finding"><span class="big">15 Clients Exited With RRH</span><p>10 of the 15 were households with children and adults.</p></div>
+        <div class="finding"><span class="big">101 Clients Moved In With Family or Friends</span><p>These clients exited to family or friends with permanent tenure, which counts as a positive exit.</p></div>
+      </div>
+    </section>
+    <div class="wnav"><button data-go="2">← Week 2</button><button data-go="4">Next: Week 4, Race and Ethnicity →</button></div>
+  </article>
+
+  <!-- WEEK 4 -->
+  <article class="week" id="week4" role="tabpanel" aria-labelledby="t4" hidden>
+    <div class="week-head">
+      <div class="eyebrow">Week 4 of 4</div>
+      <h2>Does Exit Destination Differ by Race and Ethnicity?</h2>
+      <p class="lede">APR Q23e reports destination category by race and ethnicity. We review this data to make sure clients of every background are exiting to stable housing at similar rates.</p>
+    </div>
+
+    <section>
+      <h3>Who Exited This Quarter?</h3>
+      <div class="kpis three">
+        <div class="kpi"><span class="label">Black, African American, or African</span><span class="val">753</span><span class="note">87.3% of exits</span></div>
+        <div class="kpi"><span class="label">White</span><span class="val">73</span><span class="note">8.5% of exits</span></div>
+        <div class="kpi"><span class="label">All other groups and unknown</span><span class="val">37</span><span class="note">4.3% · 26 unknown</span></div>
+      </div>
+    </section>
+
+    <section>
+      <h3>How Did Destination Differ by Race and Ethnicity? <span class="code">Q23e</span></h3>
+      <p class="sub">Groups with fewer than 30 clients are combined, since percentages for very small groups can change a lot from quarter to quarter.</p>
+      <div class="legend" data-legend></div>
+      <div class="panel"><div class="stack-rows" id="race"></div></div>
+    </section>
+
+    <section>
+      <h3>Rate Comparison</h3>
+      <div class="tbl-wrap" style="margin-top:0"><table>
+        <thead><tr><th>Destination category</th><th>Black, African American, or African<br>(n = 753)</th><th>White<br>(n = 73)</th><th>All exits<br>(n = 863)</th></tr></thead>
+        <tbody id="racetable"></tbody>
+      </table></div>
+      <p class="sub">These percentages are shares of all exits. They cannot be compared directly to the 54.99% positive exit rate in Week 1, because Q23e does not separate out excluded destinations by race.</p>
+    </section>
+
+    <section>
+      <h3>Key Takeaways</h3>
+      <div class="findings">
+        <div class="finding"><span class="big">Permanent Exit Rates Were Similar</span><p>52% of Black clients and 47% of White clients exited to permanent housing. Exits to homeless situations were also similar, at 12% and 11%.</p></div>
+        <div class="finding"><span class="big">Institutional Exits Differed</span><p>16% of White clients (12 of 73) exited to an institutional setting, compared with 2% of Black clients (18 of 753).</p></div>
+        <div class="finding"><span class="big">26 Clients With Race Not Recorded</span><p>22 of these 26 clients exited to permanent housing.</p></div>
+        <div class="finding"><span class="big">Other Situations: 21% and 16%</span><p>157 of 753 Black clients and 12 of 73 White clients exited to Other Situations.</p></div>
+      </div>
+      <div class="flag">There were only 73 White exits this quarter, so a small number of clients can change these percentages a lot. We will continue to track the difference in institutional exits in future quarters.</div>
+    </section>
+    <div class="wnav"><button data-go="3">← Week 3</button><button data-go="1">Back to Week 1</button></div>
+  </article>
+
+  <section id="acronyms" aria-label="Acronym index">
+    <h3>Acronym Index</h3>
+    <dl class="gloss">
+      <div><dt>APR</dt><dd><b>Annual Performance Report</b>, HUD’s standard report on project outcomes. Q23c, Q23d and Q23e are question numbers in the APR.</dd></div>
+      <div><dt>Q23c</dt><dd>APR question on exit destination, by household type.</dd></div>
+      <div><dt>Q23d</dt><dd>APR question on subsidy type for exits to a rental with an ongoing subsidy.</dd></div>
+      <div><dt>Q23e</dt><dd>APR question on exit destination category by race and ethnicity.</dd></div>
+      <div><dt>CoC</dt><dd><b>Continuum of Care</b>, the local body that plans and funds homeless services in a region, and HUD’s funding program of the same name.</dd></div>
+      <div><dt>ES</dt><dd><b>Emergency Shelter</b></dd></div>
+      <div><dt>ESG</dt><dd><b>Emergency Solutions Grants</b>, HUD funding for shelter, outreach, prevention and rapid rehousing.</dd></div>
+      <div><dt>FUP</dt><dd><b>Family Unification Program</b> voucher, for families and youth involved with child welfare.</dd></div>
+      <div><dt>FYI</dt><dd><b>Foster Youth to Independence</b> initiative voucher, for young people leaving foster care.</dd></div>
+      <div><dt>GPD TIP</dt><dd>VA <b>Grant and Per Diem Transition in Place</b>, where a veteran’s transitional unit becomes their permanent home.</dd></div>
+      <div><dt>HCV</dt><dd><b>Housing Choice Voucher</b>, often called Section 8.</dd></div>
+      <div><dt>HMIS</dt><dd><b>Homeless Management Information System</b>, the database where we record client data.</dd></div>
+      <div><dt>HOPWA</dt><dd><b>Housing Opportunities for Persons With AIDS</b>, a HUD housing program.</dd></div>
+      <div><dt>HP</dt><dd><b>Homelessness Prevention</b>, help for people at risk of losing their housing.</dd></div>
+      <div><dt>HUD</dt><dd>U.S. Department of <b>Housing and Urban Development</b>.</dd></div>
+      <div><dt>PH</dt><dd><b>Permanent Housing</b></dd></div>
+      <div><dt>PSH</dt><dd><b>Permanent Supportive Housing</b>, long-term housing with support services.</dd></div>
+      <div><dt>RRH</dt><dd><b>Rapid Re-Housing</b>, short- to medium-term rental assistance with services.</dd></div>
+      <div><dt>SO</dt><dd><b>Street Outreach</b></dd></div>
+      <div><dt>SPM 7</dt><dd>HUD <b>System Performance Measure 7</b>, successful placement from SO and placement in or retention of PH.</dd></div>
+      <div><dt>TH</dt><dd><b>Transitional Housing</b></dd></div>
+      <div><dt>VASH</dt><dd><b>HUD–Veterans Affairs Supportive Housing</b>, vouchers paired with VA case management for veterans.</dd></div>
+    </dl>
+  </section>
+
+  <footer>
+    <p>Source: HMIS, HUD APR questions Q23c, Q23d and Q23e, all projects, July 1 – September 30, 2026. All four weeks use the same quarterly data.</p>
+    <p>Positive exit definitions follow HUD SPM 7.</p>
+  </footer>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script>
+const CATS = [
+  { key: "perm", name: "Permanent", color: "var(--perm)", text: "#fff" },
+  { key: "temp", name: "Temporary", color: "var(--temp)", text: "#fff" },
+  { key: "inst", name: "Institutional", color: "var(--inst)", text: "#fff" },
+  { key: "home", name: "Homeless", color: "var(--home)", text: "#1a1a1a" },
+  { key: "other", name: "Other", color: "var(--other)", text: "#1a1a1a" },
+];
+// [name, total, adults only, families, child only]
+const DATA = {
+  home: [
+    ["Place not meant for habitation", 61, 14, 47, 0],
+    ["Emergency shelter (ES), incl. hotel/motel with ES voucher, Host Home shelter", 37, 19, 15, 3],
+    ["Safe Haven", 3, 3, 0, 0],
+  ],
+  inst: [
+    ["Foster care home or group home", 5, 0, 5, 0],
+    ["Hospital or residential medical facility", 11, 11, 0, 0],
+    ["Jail, prison, or juvenile detention", 5, 5, 0, 0],
+    ["Long-term care or nursing home", 1, 1, 0, 0],
+    ["Psychiatric hospital or facility", 2, 1, 1, 0],
+    ["Substance use treatment or detox", 7, 7, 0, 0],
+  ],
+  temp: [
+    ["Transitional housing (TH) for homeless persons", 5, 5, 0, 0],
+    ["Residential project or halfway house, no homeless criteria", 1, 1, 0, 0],
+    ["Hotel or motel, no ES voucher", 6, 2, 4, 0],
+    ["Host home (non-crisis)", 1, 1, 0, 0],
+    ["Family, temporary tenure", 80, 22, 58, 0],
+    ["Friends, temporary tenure", 12, 6, 6, 0],
+    ["Moved from one HOPWA project to HOPWA TH", 0, 0, 0, 0],
+  ],
+  perm: [
+    ["Family, permanent tenure", 88, 31, 57, 0],
+    ["Friends, permanent tenure", 13, 7, 6, 0],
+    ["Moved from one HOPWA project to HOPWA PH", 0, 0, 0, 0],
+    ["Rental by client, no ongoing housing subsidy", 294, 80, 214, 0],
+    ["Rental by client, with ongoing housing subsidy", 54, 38, 16, 0],
+    ["Owned by client, with ongoing housing subsidy", 0, 0, 0, 0],
+    ["Owned by client, no ongoing housing subsidy", 2, 1, 1, 0],
+  ],
+  other: [
+    ["No exit interview completed", 81, 60, 21, 0],
+    ["Other", 52, 8, 44, 0],
+    ["Deceased", 4, 4, 0, 0],
+    ["Client doesn’t know or prefers not to answer", 28, 9, 19, 0],
+    ["Data not collected", 10, 9, 1, 0],
+  ],
+};
+const TOTAL = 863;
+const sum = (rows, i) => rows.reduce((a, r) => a + r[i], 0);
+const pct = (n, d) => 100 * n / d;
+const fmtPct = p => p >= 10 ? p.toFixed(0) + "%" : p.toFixed(1) + "%";
+
+/* tooltip */
+const tip = document.getElementById("tip");
+function showTip(x0, y0, html) {
+  tip.innerHTML = html; tip.hidden = false;
+  const r = tip.getBoundingClientRect();
+  let x = x0 + 14, y = y0 + 14;
+  if (x + r.width > innerWidth - 8) x = Math.max(8, x0 - r.width - 14);
+  if (y + r.height > innerHeight - 8) y = y0 - r.height - 14;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.hidden = true; }
+function bindTip(el, html) {
+  el.tabIndex = 0;
+  el.addEventListener("mousemove", e => showTip(e.clientX, e.clientY, html));
+  el.addEventListener("mouseleave", hideTip);
+  el.addEventListener("focus", () => { const b = el.getBoundingClientRect(); showTip(b.left + b.width / 2, b.bottom, html); });
+  el.addEventListener("blur", hideTip);
+}
+
+/* legends */
+document.querySelectorAll("[data-legend]").forEach(l => {
+  l.innerHTML = CATS.map(c => `<span><i class="swatch" style="background:${c.color}"></i>${c.name}</span>`).join("");
+});
+
+function stackRow(host, label, sublabel, counts, n) {
+  const row = document.createElement("div"); row.className = "srow";
+  row.innerHTML = `<div class="who">${label}<small>${sublabel}</small></div>`;
+  const bar = document.createElement("div"); bar.className = "bar100"; bar.setAttribute("role", "img");
+  const parts = [];
+  CATS.forEach(c => {
+    const v = counts[c.key]; if (!v) return;
+    const p = pct(v, n);
+    parts.push(`${c.name} ${v} (${fmtPct(p)})`);
+    const s = document.createElement("div"); s.className = "seg";
+    s.style.flex = `${v} 1 0`; s.style.background = c.color; s.style.color = c.text;
+    if (p >= 7) s.textContent = fmtPct(p);
+    bindTip(s, `<b>${label} · ${c.name}</b>${v} of ${n} exits · ${p.toFixed(1)}%`);
+    bar.appendChild(s);
+  });
+  bar.setAttribute("aria-label", `${label}: ${parts.join(", ")}`);
+  row.appendChild(bar); host.appendChild(row);
+}
+function barRow(host, name, value, max, denom, color, tipHtml) {
+  const d = document.createElement("div"); d.className = "drow";
+  d.innerHTML = `<span class="name">${name}</span><div class="track"><div class="fill" style="width:${(100 * value / max).toFixed(2)}%;background:${color}"></div></div><span class="n"><b>${value}</b> · ${fmtPct(pct(value, denom))}</span>`;
+  if (tipHtml) bindTip(d, tipHtml);
+  host.appendChild(d);
+}
+const hhTip = r => `<b>${r[0]}</b>Without children: ${r[2]}<br>With children and adults: ${r[3]}${r[4] ? `<br>With only children: ${r[4]}` : ""}`;
+
+/* week 2: household stacks */
+const stacks = document.getElementById("stacks");
+[["All exits", 1, TOTAL], ["Without children", 2, 345], ["With children and adults", 3, 515]].forEach(([label, i, n]) => {
+  const counts = {}; CATS.forEach(c => counts[c.key] = sum(DATA[c.key], i));
+  stackRow(stacks, label, `${n} people`, counts, n);
+});
+
+/* week 2: detail bars */
+const detail = document.getElementById("detail");
+["perm", "temp", "inst", "home", "other"].forEach(k => {
+  const cat = CATS.find(c => c.key === k);
+  const rows = DATA[k].filter(r => r[1] > 0).sort((a, b) => b[1] - a[1]);
+  const sub = sum(DATA[k], 1);
+  const h = document.createElement("div"); h.className = "group-h";
+  h.innerHTML = `<span><i class="swatch" style="background:${cat.color}"></i>${cat.name}</span><span>${sub} · ${fmtPct(pct(sub, TOTAL))}</span>`;
+  detail.appendChild(h);
+  rows.forEach(r => barRow(detail, r[0], r[1], 294, TOTAL, cat.color, hhTip(r)));
+});
+
+/* week 2: full table */
+let html = `<thead><tr><th>Destination</th><th>Total</th><th>Without children</th><th>With children and adults</th><th>With only children</th></tr></thead><tbody>`;
+["home", "inst", "temp", "perm", "other"].forEach(k => {
+  const cat = CATS.find(c => c.key === k);
+  html += `<tr class="cat"><td>${cat.name}</td><td>${sum(DATA[k],1)}</td><td>${sum(DATA[k],2)}</td><td>${sum(DATA[k],3)}</td><td>${sum(DATA[k],4)}</td></tr>`;
+  DATA[k].forEach(r => html += `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`);
+});
+html += `<tr class="tot"><td>Total</td><td>863</td><td>345</td><td>515</td><td>3</td></tr></tbody>`;
+document.getElementById("fulltable").innerHTML = html;
+
+/* week 3: permanent types */
+const permtypes = document.getElementById("permtypes");
+DATA.perm.filter(r => r[1] > 0).sort((a, b) => b[1] - a[1])
+  .forEach(r => barRow(permtypes, r[0], r[1], 294, 451, "var(--perm)", hhTip(r)));
+const pn = document.createElement("p"); pn.className = "sub"; pn.style.cssText = "margin-top:10px;font-size:12.5px";
+pn.textContent = "Percentages are shares of the 451 permanent exits.";
+permtypes.appendChild(pn);
+
+/* week 3: subsidy bars */
+const subsidy = document.getElementById("subsidy");
+[
+  ["VASH housing subsidy", 29, 27, 2], ["RRH or equivalent subsidy", 15, 5, 10], ["Rental by client, with other ongoing housing subsidy", 3, 1, 2],
+  ["Other PH dedicated for formerly homeless persons", 3, 1, 2], ["HCV voucher (tenant or project based, not dedicated)", 1, 1, 0],
+].forEach(r => barRow(subsidy, r[0], r[1], 29, 51, "var(--perm)", `<b>${r[0]}</b>Without children: ${r[2]}<br>With children and adults: ${r[3]}`));
+const z = document.createElement("p"); z.className = "sub"; z.style.cssText = "margin-top:10px;font-size:12.5px";
+z.textContent = "Percentages are shares of the 51 exits in Q23d. Zero exits this quarter with GPD TIP, public housing, Housing Stability Voucher, FUP, FYI or PSH.";
+subsidy.appendChild(z);
+
+/* week 4: race */
+const RACE = [
+  ["Black, African American, or African", 753, { home: 92, inst: 18, temp: 95, perm: 391, other: 157 }],
+  ["White", 73, { home: 8, inst: 12, temp: 7, perm: 34, other: 12 }],
+  ["All other groups and unknown", 37, { home: 1, inst: 1, temp: 3, perm: 26, other: 6 }],
+];
+const raceHost = document.getElementById("race");
+RACE.forEach(([label, n, c]) => stackRow(raceHost, label, `${n} people`, c, n));
+const ALL = { perm: 451, temp: 105, inst: 31, home: 101, other: 175 };
+document.getElementById("racetable").innerHTML = CATS.map(c =>
+  `<tr><td><i class="swatch" style="background:${c.color}"></i>${c.name}</td>` +
+  `<td>${RACE[0][2][c.key]} · ${pct(RACE[0][2][c.key], 753).toFixed(1)}%</td>` +
+  `<td>${RACE[1][2][c.key]} · ${pct(RACE[1][2][c.key], 73).toFixed(1)}%</td>` +
+  `<td>${ALL[c.key]} · ${pct(ALL[c.key], TOTAL).toFixed(1)}%</td></tr>`).join("");
+
+/* data flag breakdown */
+const dqb = document.getElementById("dqbars");
+[["No exit interview completed", 81, 60, 21], ["Other", 52, 8, 44], ["Client doesn’t know / prefers not to answer", 28, 9, 19], ["Data not collected", 10, 9, 1], ["Deceased (excluded from rate)", 4, 4, 0]]
+  .forEach(r => barRow(dqb, r[0], r[1], 81, TOTAL, r[0].startsWith("Deceased") ? "var(--axis)" : "var(--other)", `<b>${r[0]}</b>Without children: ${r[2]}<br>With children and adults: ${r[3]}`));
+
+/* tabs */
+const tabs = [...document.querySelectorAll(".tab")];
+function go(n, focusTab) {
+  tabs.forEach((t, i) => {
+    const on = i + 1 === n;
+    t.setAttribute("aria-selected", on); t.tabIndex = on ? 0 : -1;
+    document.getElementById("week" + (i + 1)).hidden = !on;
+  });
+  hideTip();
+  if (focusTab) tabs[n - 1].focus();
+  try { history.replaceState(null, "", "#week" + n); } catch (e) {}
+}
+tabs.forEach((t, i) => {
+  t.addEventListener("click", () => go(i + 1));
+  t.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") go((i + 1) % 4 + 1, true);
+    if (e.key === "ArrowLeft") go((i + 3) % 4 + 1, true);
+  });
+});
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {
+  go(+b.dataset.go);
+  document.querySelector(".tabs").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+}));
+const m = /^#week([1-4])$/.exec(location.hash);
+document.querySelectorAll("a[data-flag]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); go(2); document.getElementById("dataflag").scrollIntoView(); }));
+if (m) go(+m[1]);
+</script>
+</body>
+</html>
